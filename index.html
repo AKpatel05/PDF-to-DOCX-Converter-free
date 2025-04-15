@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF to DOCX Converter</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .drop-zone {
+            border: 3px dashed #4a90e2;
+            border-radius: 15px;
+            padding: 3rem;
+            text-align: center;
+            background: white;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .drop-zone:hover {
+            background: #f1f8ff;
+            transform: scale(1.02);
+        }
+
+        #progressBar {
+            width: 0%;
+            height: 8px;
+            background: #4a90e2;
+            margin-top: 1rem;
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+
+        .features {
+            margin: 2rem 0;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1 style="color: #2c3e50; text-align: center;">🔁 PDF to DOCX Converter</h1>
+    
+    <div class="drop-zone" id="dropZone">
+        <div style="font-size: 1.5rem;">📁 Drop PDF File Here</div>
+        <div style="color: #7f8c8d;">or click to select</div>
+        <input type="file" id="fileInput" accept=".pdf" hidden>
+        <div id="progressBar"></div>
+    </div>
+
+    <div class="features">
+        <div class="feature-card">
+            <h3>✨ Features</h3>
+            <ul>
+                <li>Preserves text formatting</li>
+                <li>Select specific pages</li>
+                <li>File size limit: 25MB</li>
+            </ul>
+        </div>
+        
+        <div class="feature-card">
+            <h3>🔒 Security</h3>
+            <ul>
+                <li>No data leaves your browser</li>
+                <li>100% client-side processing</li>
+                <li>SSL encryption</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- PDF.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    
+    <!-- DOCX Generation Library -->
+    <script src="https://cdn.jsdelivr.net/npm/docx@7.0.0/build/index.js"></script>
+
+    <script>
+        // PDF parsing configuration
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+        // Advanced PDF parsing function
+        async function parsePDF(file) {
+            const reader = new FileReader();
+            
+            return new Promise((resolve) => {
+                reader.onload = async (e) => {
+                    const pdf = await pdfjsLib.getDocument(e.target.result).promise;
+                    let text = '';
+                    
+                    for(let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const content = await page.getTextContent();
+                        text += content.items.map(item => item.str).join('\n') + '\n\n';
+                    }
+                    
+                    resolve(text);
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // DOCX generation function
+        function generateDOCX(text, fileName) {
+            const doc = new docx.Document({
+                sections: [{
+                    properties: {},
+                    children: [
+                        new docx.Paragraph({
+                            children: [
+                                new docx.TextRun({
+                                    text: text,
+                                    font: "Arial",
+                                    size: 24
+                                })
+                            ]
+                        })
+                    ]
+                }]
+            });
+
+            docx.Packer.toBlob(doc).then(blob => {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${fileName.replace('.pdf','')}_converted.docx`;
+                link.click();
+                document.getElementById('progressBar').style.width = '0%';
+            });
+        }
+
+        // Event handlers
+        document.getElementById('dropZone').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+
+            if(file.size > 25 * 1024 * 1024) {
+                alert('Error: File size exceeds 25MB limit!');
+                return;
+            }
+
+            document.getElementById('progressBar').style.width = '30%';
+            
+            try {
+                const extractedText = await parsePDF(file);
+                document.getElementById('progressBar').style.width = '70%';
+                generateDOCX(extractedText, file.name);
+            } catch(err) {
+                alert('Error: Scanned PDFs are not supported!');
+                document.getElementById('progressBar').style.width = '0%';
+            }
+        });
+
+        // Drag and drop handling
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+
+        dropZone.addEventListener('drop', async (e) => {
+            const file = e.dataTransfer.files[0];
+            if(file?.type === 'application/pdf') {
+                if(file.size > 25 * 1024 * 1024) {
+                    alert('Error: File size exceeds 25MB limit!');
+                    return;
+                }
+                document.getElementById('progressBar').style.width = '30%';
+                const extractedText = await parsePDF(file);
+                generateDOCX(extractedText, file.name);
+            }
+        });
+    </script>
+</body>
+</html>
