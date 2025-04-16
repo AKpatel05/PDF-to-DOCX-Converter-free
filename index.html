@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF to DOCX Converter</title>
     <meta name="keywords" content="PDF to Word, Convert PDF, Free DOCX Converter, Online PDF Editor">
     <link rel="canonical" href="https://yourdomain.com/pdf-converter">
@@ -26,6 +27,11 @@
     </script>
 
     <style>
+        :root {
+            --primary-color: #4a90e2;
+            --hover-color: #357abd;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 800px;
@@ -41,12 +47,13 @@
         }
 
         .drop-zone {
-            border: 3px dashed #4a90e2;
+            border: 3px dashed var(--primary-color);
             border-radius: 15px;
             padding: 3rem;
             background: white;
             transition: all 0.3s;
             cursor: pointer;
+            min-height: 44px; /* Touch target size */
         }
 
         .drop-zone:hover {
@@ -57,7 +64,7 @@
         #progressBar {
             width: 0%;
             height: 8px;
-            background: #4a90e2;
+            background: var(--primary-color);
             margin-top: 1rem;
             border-radius: 4px;
             transition: width 0.5s;
@@ -76,53 +83,83 @@
             border-radius: 10px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-            /* Existing CSS के अंत में जोड़ें */
-    .seo-content {
-        margin: 40px 0;
-        padding: 20px;
-        background: #fff;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
 
-    .trust-badges {
-        margin-top: 20px;
-        display: flex;
-        gap: 15px;
-        justify-content: center;
-        font-size: 0.9em;
-    }
+        /* Mobile Responsive Styles */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+                margin: 1rem auto;
+            }
 
-    .stats {
-        text-align: center;
-        margin: 30px 0;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
-    }
+            .drop-zone {
+                padding: 1.5rem;
+                font-size: 0.9rem;
+            }
 
-    .stats p {
-        margin: 10px 0;
-        color: #4a5568;
-    }
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .feature-card {
+                padding: 0.8rem;
+            }
+
+            #progressBar {
+                height: 6px;
+            }
+        }
+
+        .seo-content {
+            margin: 40px 0;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .trust-badges {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            font-size: 0.9em;
+            flex-wrap: wrap;
+        }
+
+        .stats {
+            text-align: center;
+            margin: 30px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stats p {
+            margin: 10px 0;
+            color: #4a5568;
+        }
     </style>
-    <!-- </head> से पहले जोड़ें -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 </head>
 <body>
-    <h1 style="color: #2c3e50; text-align: center;">🔁 PDF to DOCX Converter</h1>
+    <h1 style="color: #2c3e50; text-align: center;" aria-label="PDF to DOCX Converter">
+        <span role="img" aria-hidden="true">🔁</span> PDF to DOCX Converter
+    </h1>
     
-    <!-- File Upload Section Added Here -->
     <div class="upload-container">
         <div class="drop-zone" id="dropZone">
             <div style="font-size: 1.5rem;">📁 Drop PDF File Here</div>
             <div style="color: #7f8c8d;">or click to select</div>
             <input type="file" id="fileInput" accept=".pdf" hidden>
-            <div id="progressBar"></div>
+            <div id="progressBar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
     </div>
-    <!-- फ़ाइल अपलोड सेक्शन के बाद जोड़ें -->
+
     <section class="seo-content">
         <h2>Free Online PDF to Word Converter</h2>
         <p>Convert PDF to editable Word documents in 1 click with these features:</p>
@@ -138,7 +175,6 @@
         </div>
     </section>
 
-    <!-- फ़ीचर्स सेक्शन से पहले जोड़ें -->
     <div class="stats">
         <p>✅ 1,00,000+ Successful Conversions</p>
         <p>⭐ 4.9/5 User Rating</p>
@@ -164,15 +200,34 @@
         </div>
     </div>
 
-    <!-- PDF.js Library -->
+    <footer style="margin-top: 50px; text-align: center; color: #666;">
+        <p>© 2024 PDFMagic - 
+            <a href="/privacy" style="color: var(--primary-color);">Privacy Policy</a> | 
+            <a href="/terms" style="color: var(--primary-color);">Terms of Service</a>
+        </p>
+    </footer>
+
+    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-    
-    <!-- DOCX Generation Library -->
     <script src="https://cdn.jsdelivr.net/npm/docx@7.0.0/build/index.js"></script>
 
     <script>
+        // Mobile Detection and UI Update
+        if(/Android|webOS|iPhone|iPad/i.test(navigator.userAgent)) {
+            document.querySelector('.drop-zone div:first-child').innerHTML = '📱 Tap to Upload PDF';
+            document.querySelector('.drop-zone div:nth-child(2)').innerHTML = 
+                '(Max 10 pages | 25MB)';
+        }
+
         // PDF parsing configuration
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+        // Progress Update Function
+        function updateProgress(value) {
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${value}%`;
+            progressBar.setAttribute('aria-valuenow', value);
+        }
 
         // Advanced PDF parsing function
         async function parsePDF(file) {
@@ -219,7 +274,7 @@
                 link.href = URL.createObjectURL(blob);
                 link.download = `${fileName.replace('.pdf','')}_converted.docx`;
                 link.click();
-                document.getElementById('progressBar').style.width = '0%';
+                updateProgress(0);
             });
         }
 
@@ -237,15 +292,15 @@
                 return;
             }
 
-            document.getElementById('progressBar').style.width = '30%';
+            updateProgress(30);
             
             try {
                 const extractedText = await parsePDF(file);
-                document.getElementById('progressBar').style.width = '70%';
+                updateProgress(70);
                 generateDOCX(extractedText, file.name);
             } catch(err) {
                 alert('Error: Scanned PDFs are not supported!');
-                document.getElementById('progressBar').style.width = '0%';
+                updateProgress(0);
             }
         });
 
@@ -264,26 +319,17 @@
                     alert('Error: File size exceeds 25MB limit!');
                     return;
                 }
-                document.getElementById('progressBar').style.width = '30%';
+                updateProgress(30);
                 const extractedText = await parsePDF(file);
                 generateDOCX(extractedText, file.name);
             }
         });
-    </script>
-        
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXX"></script>
-    <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-XXXXX');
+
+        // Mobile Touch Handling
+        dropZone.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            document.getElementById('fileInput').click();
+        }, {passive: false});
     </script>
 </body>
-    <!-- </body> से ठीक पहले जोड़ें -->
-    <footer style="margin-top: 50px; text-align: center; color: #666;">
-        <p>© 2024 PDFMagic - 
-            <a href="/privacy" style="color: #4a90e2;">Privacy Policy</a> | 
-            <a href="/terms" style="color: #4a90e2;">Terms of Service</a>
-        </p>
-    </footer>
 </html>
